@@ -32,7 +32,7 @@ async def play(ctx):
     else:
         result = pafy.new(test_url)
         voice = bot.voice_clients[0]
-        audio = result.getbestaudio()
+        audio = result.getbestaudio(preftype='ogg')
 
         source = PCMVolumeTransformer(FFmpegPCMAudio(audio.url, **FFMPEG_OPTIONS))
 
