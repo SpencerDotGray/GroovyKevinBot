@@ -37,7 +37,7 @@ async def play(ctx):
         source = PCMVolumeTransformer(FFmpegPCMAudio(audio.url, **FFMPEG_OPTIONS))
                       
 
-        # bot.voice_clients[0].play(source)
+        bot.voice_clients[0].play(source)
         await ctx.send(f'Playing: {result.title}')
 
 
