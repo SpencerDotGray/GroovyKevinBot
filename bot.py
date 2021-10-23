@@ -34,9 +34,12 @@ async def play(ctx):
         voice = bot.voice_clients[0]
         audio = result.getbestaudio()
 
-        print(result.audiostreams)
-
-        source = PCMVolumeTransformer(FFmpegPCMAudio(audio.url, **FFMPEG_OPTIONS))
+        for index, stream in enumerate(result.streams):
+            try:
+                source = PCMVolumeTransformer(FFmpegPCMAudio(stream.url, **FFMPEG_OPTIONS))
+            except Exception:
+                print(f'trial {index} failed')
+        
 
         bot.voice_clients[0].play(source)
         await ctx.send(f'Playing: {result.title}')
