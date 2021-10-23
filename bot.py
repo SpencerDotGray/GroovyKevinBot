@@ -32,17 +32,12 @@ async def play(ctx):
     else:
         result = pafy.new(test_url)
         voice = bot.voice_clients[0]
-        audio = result.getbestaudio()
+        audio = result.streams[0]
 
-        for index, stream in enumerate(result.streams):
-            try:
-                source = PCMVolumeTransformer(FFmpegPCMAudio(stream.url, **FFMPEG_OPTIONS))
-                print(f'Trial {index} succeeded')
-            except Exception:
-                print(f'trial {index} failed')
-        
+        source = PCMVolumeTransformer(FFmpegPCMAudio(audio.url, **FFMPEG_OPTIONS))
+                      
 
-        bot.voice_clients[0].play(source)
+        # bot.voice_clients[0].play(source)
         await ctx.send(f'Playing: {result.title}')
 
 
