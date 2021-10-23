@@ -11,6 +11,7 @@ import os
 import pafy
 
 client = discord.Client()
+song_queue = []
 
 try:
     with open('./auth_tokens.json', 'r') as filein:
@@ -19,7 +20,6 @@ except FileNotFoundError:
     token = os.environ.get('token')
 
 bot = commands.Bot(command_prefix="!")
-test_url = 'https://www.youtube.com/watch?v=xy_NKN75Jhw'
 channel_id = 901364781808746526 # Put your channel id here
 FFMPEG_OPTIONS = {
     'options': '-vn'
@@ -30,19 +30,59 @@ async def play(ctx):
     if len(bot.voice_clients) == 0:
         await ctx.send('Groovy Kevin must be in a voice channel for this command')
     else:
-        result = pafy.new(test_url)
+        if bot.voice_clients[0].is_paused():
+            bot.voice_clients[0].resume()
+            await ctx.send('Music resumed')
+        else:
+            if len(song_queue) == 0:
+                await ctx.send('No music in queue.\nPlease add some')
+            else:
+                result = pafy.new(song_queue.pop())
+                voice = bot.voice_clients[0]
+                audio = result.streams[0]
+
+                source = PCMVolumeTransformer(FFmpegPCMAudio(audio.url, **FFMPEG_OPTIONS))
+                            
+                bot.voice_clients[0].play(source)
+                await ctx.send(f'Playing: {result.title}')
+
+@bot.command()
+async def skip(ctx):
+    if len(song_queue) == 0:
+        bot.voice_clients[0].stop()
+        await ctx.send('No more songs in queue')
+    else:
+        bot.voice_clients[0].stop()
+        result = pafy.new(song_queue.pop())
         voice = bot.voice_clients[0]
         audio = result.streams[0]
 
         source = PCMVolumeTransformer(FFmpegPCMAudio(audio.url, **FFMPEG_OPTIONS))
-                      
-
+                    
         bot.voice_clients[0].play(source)
         await ctx.send(f'Playing: {result.title}')
 
+@bot.command()
+async def queue(ctx):
+    url = ctx.message.content
+    url = url.replace('!queue ', '')
+    song_queue.append(url)
+    await ctx.send('Song queue')
 
 @bot.command()
-async def start(ctx):
+async def pause(ctx):
+    if bot.voice_clients[0].is_playing():
+        bot.voice_clients[0].pause()
+        await ctx.send('Music paused')
+
+@bot.command()
+async def stop(ctx):
+    if bot.voice_clients[0].is_playing():
+        bot.voice_clients[0].stop()
+        await ctx.send('Music stopped')
+
+@bot.command()
+async def join(ctx):
     if len(bot.voice_clients) == 1:
         await ctx.send('I am already started and can only be in one voice channel at a time')
     else:
@@ -54,7 +94,7 @@ async def start(ctx):
 
 
 @bot.command()
-async def stop(ctx):
+async def leave(ctx):
     for x in bot.voice_clients:
         await x.disconnect()
 
