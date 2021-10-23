@@ -37,6 +37,7 @@ async def play(ctx):
         for index, stream in enumerate(result.streams):
             try:
                 source = PCMVolumeTransformer(FFmpegPCMAudio(stream.url, **FFMPEG_OPTIONS))
+                print(f'Trial {index} succeeded')
             except Exception:
                 print(f'trial {index} failed')
         
