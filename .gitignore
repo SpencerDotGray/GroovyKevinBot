@@ -5,6 +5,7 @@ __pycache__/
 
 # other
 tokens.json
+auth_tokens.json
 
 # C extensions
 *.so
