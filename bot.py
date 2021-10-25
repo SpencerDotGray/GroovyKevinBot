@@ -71,7 +71,7 @@ async def showqueue(ctx):
     video_em = discord.Embed()
     for index, song in enumerate(song_queue):
         song_info = get_song_info(song)
-        video_em.add_field(f'{index+1}{song_info["title"]}', f'\t{index+1}.) {song_info["title"]} - {song_info["link"]}')
+        video_em.add_field(name=f'{index+1}{song_info["title"]}', value=f'\t{index+1}.) {song_info["title"]} - {song_info["link"]}')
     await ctx.send('', embed=video_em)
 
 @bot.command()
