@@ -66,7 +66,7 @@ async def skip(ctx):
         await ctx.send(f'Playing: {song["title"]}')
 
 @bot.command()
-async def show_queue(ctx):
+async def showqueue(ctx):
     output = 'Queue:'
     for index, song in enumerate(song_queue):
         song_info = get_song_info(song)
