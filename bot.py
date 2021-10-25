@@ -84,7 +84,7 @@ async def queue(ctx):
     elif len(splits) >= 2 and splits[1] == '-empty':
         song_queue.clear()
         em = discord.Embed()
-        em.add_field(value='Queue emptied', inline=False)
+        em.add_field(name='Queue emptied', value='bottom text', inline=False)
         await ctx.send('', embed=em)
     elif len(splits) >= 2:
         song_queue.append(splits[1])
