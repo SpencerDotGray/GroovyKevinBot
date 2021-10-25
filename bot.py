@@ -25,6 +25,15 @@ FFMPEG_OPTIONS = {
     'options': '-vn'
 }
 
+def get_song_info(link):
+    result = pafy.new(link)
+    audio = result.streams[0]
+    return {
+        'title': result.title,
+        'source': PCMVolumeTransformer(FFmpegPCMAudio(audio.url, **FFMPEG_OPTIONS)),
+        'link': link
+    }
+
 @bot.command()
 async def play(ctx):
     if len(bot.voice_clients) == 0:
@@ -37,14 +46,11 @@ async def play(ctx):
             if len(song_queue) == 0:
                 await ctx.send('No music in queue.\nPlease add some')
             else:
-                result = pafy.new(song_queue.pop())
+                song = get_song_info(song_queue.pop())
                 voice = bot.voice_clients[0]
-                audio = result.streams[0]
-
-                source = PCMVolumeTransformer(FFmpegPCMAudio(audio.url, **FFMPEG_OPTIONS))
                             
-                bot.voice_clients[0].play(source)
-                await ctx.send(f'Playing: {result.title}')
+                bot.voice_clients[0].play(song['source'])
+                await ctx.send(f'Playing: {song["title"]}')
 
 @bot.command()
 async def skip(ctx):
@@ -53,21 +59,26 @@ async def skip(ctx):
         await ctx.send('No more songs in queue')
     else:
         bot.voice_clients[0].stop()
-        result = pafy.new(song_queue.pop())
         voice = bot.voice_clients[0]
-        audio = result.streams[0]
-
-        source = PCMVolumeTransformer(FFmpegPCMAudio(audio.url, **FFMPEG_OPTIONS))
+        song = get_song_info(song_queue.pop())
                     
-        bot.voice_clients[0].play(source)
-        await ctx.send(f'Playing: {result.title}')
+        bot.voice_clients[0].play(song['source'])
+        await ctx.send(f'Playing: {song["title"]}')
+
+@bot.command()
+async def show_queue(ctx):
+    output = 'Queue:'
+    for index, song in enumerate(song_queue):
+        song_info = get_song_info(song)
+        output += f'{index}.) {song_info["title"] - song_info["link"]}'
+    await ctx.send(output)
 
 @bot.command()
 async def queue(ctx):
     url = ctx.message.content
     url = url.replace('!queue ', '')
     song_queue.append(url)
-    await ctx.send('Song queue')
+    await ctx.send('Song queued')
 
 @bot.command()
 async def pause(ctx):
@@ -100,7 +111,5 @@ async def leave(ctx):
 
 
 if __name__ == "__main__":
-    # print(f'Running message at: {WHEN.hour}:{WHEN.minute}:{WHEN.second}')
-    # bot.loop.create_task(morning_upload_background_task())
-    # bot.loop.create_task(upload_check_background_task())
+    print('Online')
     bot.run(token)
