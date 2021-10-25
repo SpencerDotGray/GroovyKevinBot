@@ -20,7 +20,7 @@ except FileNotFoundError:
     token = os.environ.get('token')
 
 bot = commands.Bot(command_prefix="!")
-channel_id = 901364781808746526 # Put your channel id here
+current_song = None
 FFMPEG_OPTIONS = {
     'options': '-vn'
 }
@@ -33,6 +33,7 @@ def get_song_info(link):
         'source': PCMVolumeTransformer(FFmpegPCMAudio(audio.url, **FFMPEG_OPTIONS)),
         'link': link
     }
+
 
 @bot.command()
 async def play(ctx):
@@ -47,6 +48,7 @@ async def play(ctx):
                 await ctx.send('No music in queue.\nPlease add some')
             else:
                 song = get_song_info(song_queue.pop())
+                current_song = song
                 voice = bot.voice_clients[0]
                             
                 bot.voice_clients[0].play(song['source'])
@@ -61,25 +63,35 @@ async def skip(ctx):
         bot.voice_clients[0].stop()
         voice = bot.voice_clients[0]
         song = get_song_info(song_queue.pop())
+        current_song = song
                     
         bot.voice_clients[0].play(song['source'])
         await ctx.send(f'Playing: {song["title"]}')
 
-@bot.command()
-async def showqueue(ctx):
-
-    video_em = discord.Embed()
-    for index, song in enumerate(song_queue):
-        song_info = get_song_info(song)
-        video_em.add_field(name=f'{index+1}.) {song_info["title"]}', value=f'{song_info["link"]}', inline=False)
-    await ctx.send('', embed=video_em)
 
 @bot.command()
 async def queue(ctx):
-    url = ctx.message.content
-    url = url.replace('!queue ', '')
-    song_queue.append(url)
-    await ctx.send('Song queued')
+
+    message = ctx.message.content
+    splits = message.split(' ')
+
+    if len(splits) >= 2 and splits[1] == '-show':
+        em = discord.Embed()
+        for index, song in enumerate(song_queue):
+            song_info = get_song_info(song)
+            em.add_field(name=f'{index+1}.) {song_info["title"]}', value=f'{song_info["link"]}', inline=False)
+        await ctx.send('', embed=em)
+    elif len(splits) >= 2 and splits[1] == '-empty':
+        song_queue.clear()
+        em = discord.Embed()
+        em.add_field(value='Queue emptied', inline=False)
+        await ctx.send('', embed=em)
+    elif len(splits) >= 2:
+        song_queue.append(splits[1])
+        song = get_song_info(song_queue[-1])
+        em = discord.Embed()
+        em.add_field(name='Song Queued', value=f'{song["title"] - song["link"]}', inline=False)
+        await ctx.send('', embed=em)
 
 @bot.command()
 async def pause(ctx):
@@ -92,6 +104,7 @@ async def stop(ctx):
     if bot.voice_clients[0].is_playing():
         bot.voice_clients[0].stop()
         await ctx.send('Music stopped')
+        current_song = None
 
 @bot.command()
 async def join(ctx):
