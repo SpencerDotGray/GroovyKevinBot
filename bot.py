@@ -90,7 +90,7 @@ async def queue(ctx):
         song_queue.append(splits[1])
         song = get_song_info(song_queue[-1])
         em = discord.Embed()
-        em.add_field(name='Song Queued', value=f'{song["title"] - song["link"]}', inline=False)
+        em.add_field(name='Song Queued', value=f'{song["title"]} - {song["link"]}', inline=False)
         await ctx.send('', embed=em)
 
 @bot.command()
