@@ -70,7 +70,7 @@ async def showqueue(ctx):
     output = 'Queue:'
     for index, song in enumerate(song_queue):
         song_info = get_song_info(song)
-        output += f'{index}.) {song_info["title"] - song_info["link"]}'
+        output += f'{index}.) {song_info["title"]} - {song_info["link"]}'
     await ctx.send(output)
 
 @bot.command()
