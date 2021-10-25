@@ -111,5 +111,5 @@ async def leave(ctx):
 
 
 if __name__ == "__main__":
-    print('Online')
+    print(f'Online with token: {token}')
     bot.run(token)
