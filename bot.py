@@ -37,22 +37,31 @@ def get_song_info(link):
 
 @bot.command()
 async def play(ctx):
+    global current_song
     if len(bot.voice_clients) == 0:
-        await ctx.send('Groovy Kevin must be in a voice channel for this command')
+        em = discord.Embed()
+        em.add_field(name='Not in VC', value=f'Groovy Kevin must be in a voice channel for this command', inline=False)
+        await ctx.send('', embed=em)
     else:
         if bot.voice_clients[0].is_paused():
             bot.voice_clients[0].resume()
-            await ctx.send('Music resumed')
+            em = discord.Embed()
+            em.add_field(name='Music Resumed', value=f'{current_song["title"]} - {current_song["link"]}', inline=False)
+            await ctx.send('', embed=em)
         else:
             if len(song_queue) == 0:
-                await ctx.send('No music in queue.\nPlease add some')
+                em = discord.Embed()
+                em.add_field(name='No Music in Queue', value=f'Queue empty', inline=False)
+                await ctx.send('', embed=em)
             else:
                 song = get_song_info(song_queue.pop())
                 current_song = song
                 voice = bot.voice_clients[0]
+                em = discord.Embed()
+                em.add_field(name='Now Playing', value=f'{current_song["title"]} - {current_song["link"]}', inline=False)
                             
                 bot.voice_clients[0].play(song['source'])
-                await ctx.send(f'Playing: {song["title"]}')
+                await ctx.send('', embed=em)
 
 @bot.command()
 async def skip(ctx):
@@ -66,7 +75,9 @@ async def skip(ctx):
         current_song = song
                     
         bot.voice_clients[0].play(song['source'])
-        await ctx.send(f'Playing: {song["title"]}')
+        em = discord.Embed()
+        em.add_field(name='Song skipped - Next Song', value=f'{current_song["title"]} - {current_song["link"]}', inline=False)
+        await ctx.send('', embed=em)
 
 
 @bot.command()
@@ -97,23 +108,32 @@ async def queue(ctx):
 async def pause(ctx):
     if bot.voice_clients[0].is_playing():
         bot.voice_clients[0].pause()
-        await ctx.send('Music paused')
+        em = discord.Embed()
+        em.add_field(name='Music Paused', value=f'{current_song["title"]} - {current_song["link"]}', inline=False)
+        await ctx.send('', embed=em)
 
 @bot.command()
 async def stop(ctx):
+    global current_song
     if bot.voice_clients[0].is_playing():
         bot.voice_clients[0].stop()
-        await ctx.send('Music stopped')
+        em = discord.Embed()
+        em.add_field(name='Music Stopped', value=f'{current_song["title"]} - {current_song["link"]}', inline=False)
+        await ctx.send('', embed=em)
         current_song = None
 
 @bot.command()
 async def join(ctx):
     if len(bot.voice_clients) == 1:
-        await ctx.send('I am already started and can only be in one voice channel at a time')
+        em = discord.Embed()
+        em.add_field(name='Already In', value='I am already started and can only be in one voice channel at a time', inline=False)
+        await ctx.send('', embed=em)
     else:
         voice = ctx.message.author.voice
         if not voice:
-            await ctx.send('You must be connected to a voice channel for this command')
+            em = discord.Embed()
+            em.add_field(name='Already In', value='You must be connected to a voice channel for this command', inline=False)
+            await ctx.send('', embed=em)
         else:
             await voice.channel.connect()
 
