@@ -67,11 +67,12 @@ async def skip(ctx):
 
 @bot.command()
 async def showqueue(ctx):
-    output = 'Queue:'
+
+    video_em = discord.Embed()
     for index, song in enumerate(song_queue):
         song_info = get_song_info(song)
-        output += f'{index}.) {song_info["title"]} - {song_info["link"]}'
-    await ctx.send(output)
+        video_em.add_field(f'{index+1}{song_info["title"]}', f'\t{index+1}.) {song_info["title"]} - {song_info["link"]}')
+    await ctx.send('', embed=video_em)
 
 @bot.command()
 async def queue(ctx):
